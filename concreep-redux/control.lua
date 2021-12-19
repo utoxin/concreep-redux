@@ -65,6 +65,11 @@ function get_creeper()
     end
     local creeper = global.creepers[global.index]
     if not (creeper.roboport and creeper.roboport.valid) or creeper.off then
+        if creeper.roboport and creeper.roboport.valid and creeper.off and creeper.removal_counter < 10 then
+            creeper.removal_counter = creeper.removal_counter + 1
+            return
+        end
+
         --Roboport removed
         table.remove(global.creepers, global.index)
         return
@@ -78,12 +83,10 @@ function checkRoboports()
         if settings.global["concreep-range"].value == 0 then
             return
         end
-        --for index, creeper in pairs(global.creepers) do
         local creeper = global.creepers[global.index]
         if creeper then
             -- Redundant?
             local roboport = creeper.roboport
-            local radius = creeper.radius
             local amount = 0
             -- Place a tile per every 10 robots.
             if roboport and roboport.valid then
@@ -92,7 +95,7 @@ function checkRoboports()
                     --Check if powered!
                     if roboport.logistic_network.available_construction_robots > MINIMUM_ROBOTS then
                         amount = math.floor(roboport.logistic_network.available_construction_robots / 2)
-                        roboport.force.max_successful_attemps_per_tick_per_construction_queue = math.max(roboport.force.max_successful_attemps_per_tick_per_construction_queue, math.floor(amount / 60))
+                        roboport.force.max_successful_attempts_per_tick_per_construction_queue = math.max(roboport.force.max_successful_attempts_per_tick_per_construction_queue, math.floor(amount / 60))
                         if creep(global.index, amount) then
                             return true
                         end
@@ -176,6 +179,8 @@ function creep(creeper)
         if ghost_type then
             build_tile(ghost_type, virgin_tiles[i].position)
         end
+
+        creeper.removal_counter = 0
     end
 
     if count >= idle_robots then
@@ -207,10 +212,10 @@ function creep(creeper)
                     tile_type = "concrete"
                 end
                 build_tile(tile_type, v.position)
+                creeper.removal_counter = 0
             end
 
             if count >= idle_robots then
-                --game.print("Found some work to do.  Terminating early.")
                 return true
             end
             idle_robots = idle_robots - count
@@ -218,8 +223,6 @@ function creep(creeper)
             if count >= idle_robots then
                 return true
             end
-        else
-            log("No potential upgrade types defined.")
         end
     end
 
@@ -235,6 +238,7 @@ function creep(creeper)
             end
             if switch then
                 creeper.off = true
+                creeper.removal_counter = 1
             else
                 creeper.radius = 4 --Reset radius and switch to upgrade mode.
                 creeper.upgrade = true
@@ -264,7 +268,8 @@ end
 
 function addPort(roboport)
     local surface = roboport.surface
-    -- Now capture the pattern the roboport sits on.
+
+    -- Capture the pattern the roboport sits on.
     local patt = {}
     local it = {}
     for xx = -2, 1, 1 do
@@ -278,7 +283,8 @@ function addPort(roboport)
             end
         end
     end
-    table.insert(global.creepers, { roboport = roboport, radius = 1, pattern = patt, item = it })
+
+    table.insert(global.creepers, { roboport = roboport, radius = 1, pattern = patt, item = it, off = false, removal_counter = 0 })
 end
 
 --This does not check collision mask.
