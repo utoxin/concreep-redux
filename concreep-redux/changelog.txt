@@ -30,7 +30,7 @@ Date: 2020.04.24
 Version: 1.4.1
 Date: 2020.04.06
   Bugfixes:
-    - Fixed an script error around trying to preserve some refined-concrete.
+    - Fixed a script error around trying to preserve some refined-concrete.
 ---------------------------------------------------------------------------------------------------
 Version: 1.4.0
 Date: 2020.04.03
@@ -41,7 +41,7 @@ Date: 2020.04.03
 Version: 1.3.9
 Date: 2020.3.09
   Changes:
-    - Fixed migration logic (old versions of conreep or adding to a new game)
+    - Fixed migration logic (old versions of concreep or adding to a new game)
 ---------------------------------------------------------------------------------------------------
 Version: 1.3.8
 Date: 2020.3.05
@@ -101,7 +101,7 @@ Date: 2017.12.28
   Added:
     - Concreep now autoremoves cliffs as concrete is laid down.  Right now it auto-deducts the cliff-explosives from the logistic network instead of delivering it via bot.  Hoping to change this in the future.
   Note:
-    - A roboport may fail to remove cliffs if insufficient cliff-explosives are available and it can be stuck in a state where it won't check again.
+    - A roboport may fail to remove cliffs if insufficient cliff-explosives are available, and it can be stuck in a state where it won't check again.
 ---------------------------------------------------------------------------------------------------
 Version: 1.1.0
 Date: 2017.12.15
