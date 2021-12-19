@@ -59,7 +59,7 @@ end
 
 function checkRoboports()
     if global.creepers and #global.creepers > 0 then
-        if settings.global["concreep range"].value == 0 then
+        if settings.global["concreep-range"].value == 0 then
             return
         end
         --for index, creeper in pairs(global.creepers) do
@@ -98,7 +98,7 @@ function creep(creeper)
     local roboport = creeper.roboport
     local surface = roboport.surface
     local force = roboport.force
-    local radius = math.min(creeper.radius, settings.global["concreep range"].value * roboport.logistic_cell.construction_radius / 100)
+    local radius = math.min(creeper.radius, settings.global["concreep-range"].value * roboport.logistic_cell.construction_radius / 100)
     local idle_robots = roboport.logistic_network.available_construction_robots / 2
 
     local count = 0
@@ -149,7 +149,7 @@ function creep(creeper)
                 ghost_type = "refined-concrete"
             elseif count < concrete_count then
                 ghost_type = "concrete"
-            elseif settings.global["creep brick"].value and count < brick_count then
+            elseif settings.global["creep-brick"].value and count < brick_count then
                 ghost_type = "stone-path"
             end
         else
@@ -169,10 +169,10 @@ function creep(creeper)
 
     --Still here?  Look for concrete to upgrade
     local upgrade_target_types = {}
-    if settings.global["upgrade brick"].value then
+    if settings.global["upgrade-brick"].value then
         table.insert(upgrade_target_types, "stone-path")
     end
-    if settings.global["upgrade concrete"].value then
+    if settings.global["upgrade-concrete"].value then
         table.insert(upgrade_target_types, "concrete")
         table.insert(upgrade_target_types, "hazard-concrete-left")
         table.insert(upgrade_target_types, "hazard-concrete-right")
@@ -209,7 +209,7 @@ function creep(creeper)
 
     --Still here?  Check to see if the roboport should turn off.
     if surface.count_tiles_filtered { area = area, has_hidden_tile = false, collision_mask = surface.get_tile(roboport.position).prototype.collision_mask } == 0 then
-        if radius < roboport.logistic_cell.construction_radius * settings.global["concreep range"].value / 100 then
+        if radius < roboport.logistic_cell.construction_radius * settings.global["concreep-range"].value / 100 then
             creeper.radius = math.min(creeper.radius + 2, roboport.logistic_cell.construction_radius) -- Todo for next version
         else
             local switch = true
