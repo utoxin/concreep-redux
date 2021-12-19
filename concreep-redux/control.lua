@@ -17,9 +17,23 @@ function init()
     end
 end
 
+function wake_up_creepers()
+    global.index = 1
+    find_fastest_tile()
+    for _, surface in pairs(game.surfaces) do
+        local roboports = surface.find_entities_filtered { type = "roboport" }
+        for _, port in pairs(roboports) do
+            if validate(port) then
+                addPort(port)
+            end
+        end
+    end
+end
+
 function check_roboports()
     -- Iterate over up to 5 entities
     if #global.creepers == 0 then
+        wake_up_creepers()
         return
     end
     for i = 1, 5 do
