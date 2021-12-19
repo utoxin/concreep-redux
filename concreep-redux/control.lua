@@ -65,7 +65,7 @@ function get_creeper()
     end
     local creeper = global.creepers[global.index]
     if not (creeper.roboport and creeper.roboport.valid) or creeper.off then
-        if creeper.roboport and creeper.roboport.valid and creeper.off and creeper.removal_counter < 10 then
+        if creeper.roboport and creeper.roboport.valid and creeper.off and creeper.removal_counter and creeper.removal_counter < 10 then
             creeper.removal_counter = creeper.removal_counter + 1
             return
         end
