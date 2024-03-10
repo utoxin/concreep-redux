@@ -1,8 +1,5 @@
 if script.active_mods["gvv"] then require("__gvv__.gvv")() end
 
-MINIMUM_ROBOTS = 30
-MINIMUM_ITEM_COUNT = 200
-
 function init()
     global.creepers = {}
     global.index = 1
@@ -93,12 +90,10 @@ function checkRoboports()
                 --Check if still alive
                 if roboport.logistic_network and roboport.logistic_network.valid and roboport.prototype.electric_energy_source_prototype.buffer_capacity == roboport.energy then
                     --Check if powered!
-                    if roboport.logistic_network.available_construction_robots > MINIMUM_ROBOTS then
-                        amount = math.floor(roboport.logistic_network.available_construction_robots / 2)
-                        roboport.force.max_successful_attempts_per_tick_per_construction_queue = math.max(roboport.force.max_successful_attempts_per_tick_per_construction_queue, math.floor(amount / 60))
-                        if creep(global.index, amount) then
-                            return true
-                        end
+                    amount = math.floor(roboport.logistic_network.available_construction_robots / 2)
+                    roboport.force.max_successful_attempts_per_tick_per_construction_queue = math.max(roboport.force.max_successful_attempts_per_tick_per_construction_queue, math.floor(amount / 60))
+                    if creep(global.index, amount) then
+                        return true
                     end
                 else
                     return false
@@ -117,21 +112,40 @@ function creep(creeper)
     local roboport = creeper.roboport
     local surface = roboport.surface
     local force = roboport.force
-    local radius = math.min(creeper.radius, settings.global["concreep-range"].value * roboport.logistic_cell.construction_radius / 100)
+    local minimum_item_count = settings.global["concreep-minimum-item-count"].value
+
+    local target_creep_radius = roboport.logistic_cell.construction_radius
+    if (settings.global["concreep-logistics-limit"].value) then
+        target_creep_radius = roboport.logistic_cell.logistic_radius
+    end
+
+    local current_radius = math.min(creeper.radius, settings.global["concreep-range"].value * target_creep_radius / 100)
     local idle_robots = roboport.logistic_network.available_construction_robots / 2
 
     local count = 0
 
-    local area = { { roboport.position.x - radius, roboport.position.y - radius }, { roboport.position.x + radius, roboport.position.y + radius } }
+    local area = { { roboport.position.x - current_radius, roboport.position.y - current_radius }, { roboport.position.x + current_radius, roboport.position.y + current_radius } }
     local ghosts = surface.count_entities_filtered { area = area, name = "tile-ghost", force = force }
+
+    local in_space = false
+    if remote.interfaces["space-exploration"] then
+        in_space = "orbit" == remote.call("space-exploration", "get_surface_type", {surface_index = surface.index})
+    end
 
     if force.max_successful_attempts_per_tick_per_construction_queue * 60 < idle_robots then
         force.max_successful_attempts_per_tick_per_construction_queue = math.floor(idle_robots / 60)
     end
 
-    local refined_concrete_count = math.max(0, roboport.logistic_network.get_item_count("refined-concrete") - MINIMUM_ITEM_COUNT)
-    local concrete_count = math.max(0, roboport.logistic_network.get_item_count("concrete") - MINIMUM_ITEM_COUNT)
-    local brick_count = math.max(0, roboport.logistic_network.get_item_count("stone-brick") - MINIMUM_ITEM_COUNT)
+    local refined_concrete_count = math.max(0, roboport.logistic_network.get_item_count("refined-concrete") - minimum_item_count)
+    local concrete_count = math.max(0, roboport.logistic_network.get_item_count("concrete") - minimum_item_count)
+    local brick_count = math.max(0, roboport.logistic_network.get_item_count("stone-brick") - minimum_item_count)
+
+    local space_scaffold_count = 0
+    local space_tile_count = 0
+    if remote.interfaces["space-exploration"] and in_space then
+        space_scaffold_count = math.max(0, roboport.logistic_network.get_item_count("se-space-platform-scaffold") - minimum_item_count)
+        space_tile_count = math.max(0, roboport.logistic_network.get_item_count("se-space-platform-plating") - minimum_item_count)
+    end
 
     local function build_tile(type, position)
         if surface.can_place_entity { name = "tile-ghost", position = position, inner_name = type, force = force } then
@@ -164,15 +178,19 @@ function creep(creeper)
     for i = #virgin_tiles, 1, -1 do
         local ghost_type
         if not creeper.pattern[(virgin_tiles[i].position.x - 2) % 4 + 1][(virgin_tiles[i].position.y - 2) % 4 + 1] then
-            if count < refined_concrete_count then
+            if count < refined_concrete_count and not in_space then
                 ghost_type = "refined-concrete"
-            elseif count < concrete_count then
+            elseif count < concrete_count and not in_space then
                 ghost_type = "concrete"
-            elseif settings.global["creep-brick"].value and count < brick_count then
+            elseif settings.global["creep-brick"].value and count < brick_count and not in_space then
                 ghost_type = "stone-path"
+            elseif remote.interfaces["space-exploration"] and count < space_tile_count and in_space then
+                ghost_type = "se-space-platform-plating"
+            elseif remote.interfaces["space-exploration"] and count < space_scaffold_count and in_space then
+                ghost_type = "se-space-platform-scaffold"
             end
         else
-            if roboport.logistic_network.get_item_count(creeper.item[(virgin_tiles[i].position.x - 2) % 4 + 1][(virgin_tiles[i].position.y - 2) % 4 + 1]) > MINIMUM_ITEM_COUNT then
+            if roboport.logistic_network.get_item_count(creeper.item[(virgin_tiles[i].position.x - 2) % 4 + 1][(virgin_tiles[i].position.y - 2) % 4 + 1]) > minimum_item_count then
                 ghost_type = creeper.pattern[(virgin_tiles[i].position.x - 2) % 4 + 1][(virgin_tiles[i].position.y - 2) % 4 + 1]
             end
         end
@@ -190,13 +208,16 @@ function creep(creeper)
 
     --Still here?  Look for concrete to upgrade
     local upgrade_target_types = {}
-    if settings.global["upgrade-brick"].value then
+    if settings.global["upgrade-brick"].value and not in_space then
         table.insert(upgrade_target_types, "stone-path")
     end
-    if settings.global["upgrade-concrete"].value then
+    if settings.global["upgrade-concrete"].value and not in_space then
         table.insert(upgrade_target_types, "concrete")
         table.insert(upgrade_target_types, "hazard-concrete-left")
         table.insert(upgrade_target_types, "hazard-concrete-right")
+    end
+    if remote.interfaces["space-exploration"] and settings.global["upgrade-space-scaffold"].value and in_space then
+        table.insert(upgrade_target_types, "se-space-platform-scaffold")
     end
 
     if creeper.upgrade then
@@ -204,12 +225,16 @@ function creep(creeper)
             local squishy_targets = surface.find_tiles_filtered { area = area, name = upgrade_target_types, limit = math.min(math.max(concrete_count, refined_concrete_count, 0), idle_robots) }
             for _, v in pairs(squishy_targets) do
                 local tile_type = "refined-concrete"
-                if v.name == "hazard-concrete-left" then
-                    tile_type = "refined-hazard-concrete-left"
-                elseif v.name == "hazard-concrete-right" then
-                    tile_type = "refined-hazard-concrete-right"
-                elseif count >= refined_concrete_count then
-                    tile_type = "concrete"
+                if (remote.interfaces["space-exploration"]) and in_space then
+                    tile_type = "se-space-platform-plating"
+                else
+                    if v.name == "hazard-concrete-left" then
+                        tile_type = "refined-hazard-concrete-left"
+                    elseif v.name == "hazard-concrete-right" then
+                        tile_type = "refined-hazard-concrete-right"
+                    elseif count >= refined_concrete_count then
+                        tile_type = "concrete"
+                    end
                 end
                 build_tile(tile_type, v.position)
                 creeper.removal_counter = 0
@@ -228,8 +253,8 @@ function creep(creeper)
 
     --Still here?  Check to see if the roboport should turn off.
     if surface.count_tiles_filtered { area = area, has_hidden_tile = false, collision_mask = surface.get_tile(roboport.position).prototype.collision_mask } == 0 then
-        if radius < roboport.logistic_cell.construction_radius * settings.global["concreep-range"].value / 100 then
-            creeper.radius = math.min(creeper.radius + 2, roboport.logistic_cell.construction_radius) -- Todo for next version
+        if current_radius < target_creep_radius * settings.global["concreep-range"].value / 100 then
+            creeper.radius = math.min(creeper.radius + 2, roboport.logistic_cell.construction_radius)
         else
             local switch = true
 

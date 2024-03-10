@@ -1,4 +1,12 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.1.0
+Date: 2024/03/10
+  Added:
+    - Added support for Space Exploration platforms.
+    - Added setting for using logistic range instead of construction range for creep.
+    - Added setting for how many items to keep in your logistics network before creep starts.
+
+---------------------------------------------------------------------------------------------------
 Version: 2.0.0
 Date: 2021/12/19
   Changes:
