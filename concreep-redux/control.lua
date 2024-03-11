@@ -3,7 +3,6 @@ if script.active_mods["gvv"] then require("__gvv__.gvv")() end
 function init()
     global.creepers = {}
     global.index = 1
-    find_fastest_tile()
     for _, surface in pairs(game.surfaces) do
         local roboports = surface.find_entities_filtered { type = "roboport" }
         for _, port in pairs(roboports) do
@@ -16,7 +15,6 @@ end
 
 function wake_up_creepers()
     global.index = 1
-    find_fastest_tile()
     for _, surface in pairs(game.surfaces) do
         local roboports = surface.find_entities_filtered { type = "roboport" }
         for _, port in pairs(roboports) do
@@ -39,7 +37,7 @@ function check_roboports()
         end
         local creeper = get_creeper()
         if creeper == nil then
-            return
+            goto continue
         end --This is where I want a 'continue' keyword.
         local roboport = creeper.roboport
         if roboport.logistic_network and roboport.logistic_network.valid then
@@ -53,6 +51,8 @@ function check_roboports()
                 creep(creeper)
             end
         end
+
+        ::continue::
     end
 end
 
@@ -75,39 +75,6 @@ function get_creeper()
     return creeper
 end
 
-function checkRoboports()
-    if global.creepers and #global.creepers > 0 then
-        if settings.global["concreep-range"].value == 0 then
-            return
-        end
-        local creeper = global.creepers[global.index]
-        if creeper then
-            -- Redundant?
-            local roboport = creeper.roboport
-            local amount = 0
-            -- Place a tile per every 10 robots.
-            if roboport and roboport.valid then
-                --Check if still alive
-                if roboport.logistic_network and roboport.logistic_network.valid and roboport.prototype.electric_energy_source_prototype.buffer_capacity == roboport.energy then
-                    --Check if powered!
-                    amount = math.floor(roboport.logistic_network.available_construction_robots / 2)
-                    roboport.force.max_successful_attempts_per_tick_per_construction_queue = math.max(roboport.force.max_successful_attempts_per_tick_per_construction_queue, math.floor(amount / 60))
-                    if creep(global.index, amount) then
-                        return true
-                    end
-                else
-                    return false
-                end
-            else
-                -- Roboport died
-                table.remove(global.creepers, global.index)
-            end
-        else
-            table.remove(global.creepers, global.index)
-        end
-    end
-end
-
 function creep(creeper)
     local roboport = creeper.roboport
     local surface = roboport.surface
@@ -120,7 +87,20 @@ function creep(creeper)
     end
 
     local current_radius = math.min(creeper.radius, settings.global["concreep-range"].value * target_creep_radius / 100)
-    local idle_robots = roboport.logistic_network.available_construction_robots / 2
+
+    local network_cellcount = #roboport.logistic_network.cells
+    local available_bots = roboport.logistic_network.available_construction_robots
+    local total_bots = roboport.logistic_network.all_construction_robots
+    local available_bot_percentage = (available_bots / total_bots) * 100
+
+    -- If we don't have enough idle bots, break out of this roboport here
+    if (available_bot_percentage < settings.global["concreep-idle-bot-percentage"].value) then
+        return
+    end
+
+    -- Figure out how many bots to use for this creep. This is limited to no more than the number required to be idle, and is further divided by the number of roboports in the network.
+    -- This keeps any individual port from pulling too much of the network's bots towards it all at once, reducing bot travel/migration.
+    local usable_robots = math.max(1, math.ceil(((settings.global["concreep-idle-bot-percentage"].value / 100) * total_bots) / network_cellcount))
 
     local count = 0
 
@@ -132,8 +112,8 @@ function creep(creeper)
         in_space = "orbit" == remote.call("space-exploration", "get_surface_type", {surface_index = surface.index})
     end
 
-    if force.max_successful_attempts_per_tick_per_construction_queue * 60 < idle_robots then
-        force.max_successful_attempts_per_tick_per_construction_queue = math.floor(idle_robots / 60)
+    if force.max_successful_attempts_per_tick_per_construction_queue * 60 < usable_robots then
+        force.max_successful_attempts_per_tick_per_construction_queue = math.floor(usable_robots / 60)
     end
 
     local refined_concrete_count = math.max(0, roboport.logistic_network.get_item_count("refined-concrete") - minimum_item_count)
@@ -171,7 +151,7 @@ function creep(creeper)
         end
     end
 
-    local virgin_tiles = surface.find_tiles_filtered { has_hidden_tile = false, area = area, limit = idle_robots, collision_mask = surface.get_tile(roboport.position).prototype.collision_mask }
+    local virgin_tiles = surface.find_tiles_filtered { has_hidden_tile = false, area = area, limit = usable_robots, collision_mask = surface.get_tile(roboport.position).prototype.collision_mask }
     if ghosts > #virgin_tiles then
         return
     end --Wait for ghosts to finish building first.
@@ -201,10 +181,10 @@ function creep(creeper)
         creeper.removal_counter = 0
     end
 
-    if count >= idle_robots then
+    if count >= usable_robots then
         return true
     end
-    idle_robots = idle_robots - count
+    usable_robots = usable_robots - count
 
     --Still here?  Look for concrete to upgrade
     local upgrade_target_types = {}
@@ -222,7 +202,7 @@ function creep(creeper)
 
     if creeper.upgrade then
         if #upgrade_target_types > 0 then
-            local squishy_targets = surface.find_tiles_filtered { area = area, name = upgrade_target_types, limit = math.min(math.max(concrete_count, refined_concrete_count, 0), idle_robots) }
+            local squishy_targets = surface.find_tiles_filtered { area = area, name = upgrade_target_types, limit = math.min(math.max(concrete_count, refined_concrete_count, 0), usable_robots) }
             for _, v in pairs(squishy_targets) do
                 local tile_type = "refined-concrete"
                 if (remote.interfaces["space-exploration"]) and in_space then
@@ -240,12 +220,12 @@ function creep(creeper)
                 creeper.removal_counter = 0
             end
 
-            if count >= idle_robots then
+            if count >= usable_robots then
                 return true
             end
-            idle_robots = idle_robots - count
+            usable_robots = usable_robots - count
 
-            if count >= idle_robots then
+            if count >= usable_robots then
                 return true
             end
         end
@@ -312,23 +292,6 @@ function addPort(roboport)
     table.insert(global.creepers, { roboport = roboport, radius = 1, pattern = patt, item = it, off = false, removal_counter = 0 })
 end
 
---This does not check collision mask.
-function find_fastest_tile()
-    local walking_speed_modifier = 1
-    local tile_name
-    for _, tile in pairs(game.tile_prototypes) do
-        if tile.items_to_place_this and tile.walking_speed_modifier and tile.walking_speed_modifier > walking_speed_modifier then
-            walking_speed_modifier = tile.walking_speed_modifier
-            tile_name = tile.name
-        end
-    end
-    if tile_name ~= "refined-concrete" then
-        global.fastest = tile_name
-        return
-    end
-    global.fastest = nil
-end
-
 function validate_tile_names()
     for i = #global.creepers, 1, -1 do
         local creep = global.creepers[i]
@@ -337,8 +300,6 @@ function validate_tile_names()
         end
         table.remove(global.creepers, i)
     end
-    --This part may be out of scope but...
-    find_fastest_tile()
 end
 
 script.on_event(

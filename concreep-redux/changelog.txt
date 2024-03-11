@@ -1,4 +1,16 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.1.1
+Date: 2024/03/10
+  Changes:
+    - Added the idle bot logic mentioned in the 2.0.0 changelog. It will now limit bots used for construction based on this setting.
+    - Additionally, each active roboport will limit how many ghosts it places, attempting to spread the work around between active roboports.
+  Optimizations:
+    - Removed redundant / unused code.
+    - Improved looping logic to avoid early exits, allowing more processing per iteration.
+  Info:
+    - There may be minor issues with SE space surfaces, and placing tiles on asteroids. If you know of a way to improve this, I'd love to hear about it.
+
+---------------------------------------------------------------------------------------------------
 Version: 2.1.0
 Date: 2024/03/10
   Added:
@@ -84,7 +96,7 @@ Version: 1.3.6
 Date: 2019/10/30
   Added:
     - Added setting for using concreep logic for laying bricks.  On by default.
-  changes:
+  Changes:
     - Concreep will finish paving an area before looking for tiles to upgrade.
 
 ---------------------------------------------------------------------------------------------------
