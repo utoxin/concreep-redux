@@ -6,14 +6,14 @@ data:extend({
         default_value = 100,
         minimum_value = 0,
         maximum_value = 100,
-        order = "10"
+        order = "010"
     },
     {
         type = "bool-setting",
         name = "concreep-logistics-limit",
         setting_type = "runtime-global",
         default_value = false,
-        order = "20"
+        order = "020"
     },
     {
         type = "int-setting",
@@ -22,7 +22,7 @@ data:extend({
         default_value = 50,
         minimum_value = 0,
         maximum_value = 100,
-        order = "30"
+        order = "030"
     },
     {
         type = "int-setting",
@@ -30,34 +30,59 @@ data:extend({
         setting_type = "runtime-global",
         default_value = 100,
         minimum_value = 0,
-        order = "35"
+        order = "035"
     },
     {
         type = "bool-setting",
         name = "creep-brick",
         setting_type = "runtime-global",
         default_value = true,
-        order = "40"
+        order = "040"
     },
     {
         type = "bool-setting",
         name = "upgrade-brick",
         setting_type = "runtime-global",
         default_value = true,
-        order = "50"
+        order = "050"
     },
     {
         type = "bool-setting",
         name = "upgrade-concrete",
         setting_type = "runtime-global",
         default_value = true,
-        order = "60"
+        order = "060"
     },
     {
         type = "bool-setting",
         name = "upgrade-space-scaffold",
         setting_type = "runtime-global",
         default_value = true,
-        order = "70"
+        order = "070"
+    },
+    {
+        type = "bool-setting",
+        name = "concreep-tiles-per-area",
+        setting_type = "runtime-global",
+        default_value = false,
+        order = "080"
+    },
+    {
+        type = "string-setting",
+        name = "concreep-logistic-area-tile",
+        setting_type = "runtime-global",
+        default_value = "refined-concrete",
+        auto_trim = true,
+        allowed_values = {"brick", "concrete", "refined-concrete"},
+        order = "090"
+    },
+    {
+        type = "string-setting",
+        name = "concreep-construction-area-tile",
+        setting_type = "runtime-global",
+        default_value = "concrete",
+        auto_trim = true,
+        allowed_values = {"brick", "concrete", "refined-concrete"},
+        order = "100"
     }
 })

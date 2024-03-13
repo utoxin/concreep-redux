@@ -1,4 +1,17 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.2.0
+Date: 2024/03/13
+  Added:
+    - Added a mode that allows you to select tile types based on logistics/construction area.
+  Changes:
+    - Refactored the code to separate the various creep types into their own methods.
+    - Partially fixed issues with SE space surfaces, allowing 'asteroid' tiles to be upgraded into space platform.
+  Optimizations:
+    - Removed redundant / unused code.
+  Info:
+    - When attempting to place space scaffolding, it will error once per tile, but the creep will progress.
+
+---------------------------------------------------------------------------------------------------
 Version: 2.1.1
 Date: 2024/03/10
   Changes:
