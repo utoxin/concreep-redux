@@ -251,11 +251,21 @@ function area_tile_creep(creeper, creep_data)
 
     for i = #virgin_tiles, 1, -1 do
         local ghost_type
+        local tile_x = virgin_tiles[i].position.x
+        local tile_y = virgin_tiles[i].position.y
 
-        if (math.abs(virgin_tiles[i].position.x - roboport_x) > logistic_radius or math.abs(virgin_tiles[i].position.y - roboport_y) > logistic_radius) and available_construction_tile > 0 then
+        if tile_x > roboport_x then
+            tile_x = tile_x + 1
+        end
+
+        if tile_y > roboport_y then
+            tile_y = tile_y + 1
+        end
+
+        if (math.abs(tile_x - roboport_x) > logistic_radius or math.abs(tile_y - roboport_y) > logistic_radius) and available_construction_tile > 0 then
             available_construction_tile = available_construction_tile - 1
             ghost_type = construction_area_tile
-        elseif (math.abs(virgin_tiles[i].position.x - roboport_x) <= logistic_radius and math.abs(virgin_tiles[i].position.y - roboport_y) <= logistic_radius) and available_logistic_tile > 0 then
+        elseif (math.abs(tile_x - roboport_x) <= logistic_radius and math.abs(tile_y - roboport_y) <= logistic_radius) and available_logistic_tile > 0 then
             available_logistic_tile = available_logistic_tile - 1
             ghost_type = logistic_area_tile
         end
