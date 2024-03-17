@@ -1,6 +1,16 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.2.3
+Date: 2024/03/17
+  Changes:
+    - More tweaks to idle bot calculations that should improve creep throughput further
+    - Fixed a crash when a port switched from initial creep to upgrade mode.
+  Known Issues:
+    - Space Exploration Compatability: When attempting to place space scaffolding, it will error once per tile, but the creep will progress. (Issue #1)
+    - Angels Bioprocessing Compatability: Attempting to place Bio Tiles near water will deadlock a ropobort's creep method. (Issue #10)
+
+---------------------------------------------------------------------------------------------------
 Version: 2.2.2
-Date: 2024/03/13
+Date: 2024/03/16
   Changes:
     - Fixing bug with available-for-work bot calculations
   Known Issues:
@@ -9,7 +19,7 @@ Date: 2024/03/13
 
 ---------------------------------------------------------------------------------------------------
 Version: 2.2.1
-Date: 2024/03/13
+Date: 2024/03/14
   Changes:
     - Fixed slight mis-alignment with area creep. (Reported by: Violet_Scarelli)
     - Partially fixed issues with SE space surfaces, allowing 'asteroid' tiles to be upgraded into space platform.
