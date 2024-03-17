@@ -2,6 +2,7 @@ if script.active_mods["gvv"] then require("__gvv__.gvv")() end
 
 function init()
     global.creepers = {}
+    global.active_creepers = 0
     wake_up_creepers()
 end
 
@@ -19,6 +20,8 @@ end
 
 function check_roboports()
     -- Iterate over up to 5 entities
+        init()
+        return
     if #global.creepers == 0 then
         wake_up_creepers()
         return
