@@ -21,12 +21,12 @@ function wake_up_creepers()
 end
 
 function check_roboports()
-    if global.active_creepers == nil then
-        init()
-        return
-    end
+  if global.active_creepers == nil then
+      init()
+      return
+  end
 
-    if #global.creepers == 0 then
+  if #global.creepers == 0 then
         wake_up_creepers()
         return
     end
