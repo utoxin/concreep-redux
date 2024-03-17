@@ -222,7 +222,7 @@ function standard_creep(creeper, creep_data)
         end
     end
 
-    standard_sleep_check(creeper, creep_data)
+    standard_sleep_check(creeper, creep_data, upgrade_target_types)
     return false
 end
 
