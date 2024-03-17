@@ -97,9 +97,12 @@ function creep(creeper)
 
     local current_radius = math.min(creeper.radius, concreep_range_setting * target_creep_radius)
 
-    -- Figure out how many bots to use for this creep. This is limited to no more than the number required to be idle, and is further divided by the number of roboports in the network.
+    -- Figure out how many bots to use for this creep. This is limited to no more than the number allowed to be working, and is further divided by the number of roboports in the network.
     -- This keeps any individual port from pulling too much of the network's bots towards it all at once, reducing bot travel/migration.
-    local usable_robots = math.max(1, math.ceil((idle_bot_percentage_setting * total_bots) / network_cell_count))
+
+    local working_bots = total_bots - available_bots
+    local usable_robots = math.max(1, math.ceil(((1-idle_bot_percentage_setting) * total_bots) / network_cell_count) - working_bots)
+    creeper.usable_robots = usable_robots
     if force.max_successful_attempts_per_tick_per_construction_queue * 60 < usable_robots then
         force.max_successful_attempts_per_tick_per_construction_queue = math.floor(usable_robots / 60)
     end

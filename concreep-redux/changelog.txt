@@ -1,4 +1,13 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.2.2
+Date: 2024/03/13
+  Changes:
+    - Fixing bug with available-for-work bot calculations
+  Known Issues:
+    - Space Exploration Compatability: When attempting to place space scaffolding, it will error once per tile, but the creep will progress. (Issue #1)
+    - Angels Bioprocessing Compatability: Attempting to place Bio Tiles near water will deadlock a ropobort's creep method. (Issue #10)
+
+---------------------------------------------------------------------------------------------------
 Version: 2.2.1
 Date: 2024/03/13
   Changes:
