@@ -8,6 +8,8 @@ end
 
 function wake_up_creepers()
     global.index = 1
+    global.active_creepers = 0
+
     for _, surface in pairs(game.surfaces) do
         local roboports = surface.find_entities_filtered { type = "roboport" }
         for _, port in pairs(roboports) do
@@ -19,10 +21,12 @@ function wake_up_creepers()
 end
 
 function check_roboports()
-    -- Iterate over up to 5 entities
-        init()
-        return
-    if #global.creepers == 0 then
+  if global.active_creepers == nil then
+      init()
+      return
+  end
+
+  if #global.creepers == 0 then
         wake_up_creepers()
         return
     end
@@ -87,7 +91,7 @@ function creep(creeper)
 
     local surface = roboport.surface
     local force = roboport.force
-    local network_cell_count = #roboport.logistic_network.cells
+    local active_port_factor = math.min(10, global.active_creepers or 1)
 
     local minimum_item_count_setting = settings.global["concreep-minimum-item-count"].value
     local concreep_range_setting = settings.global["concreep-range"].value / 100
@@ -104,7 +108,7 @@ function creep(creeper)
     -- This keeps any individual port from pulling too much of the network's bots towards it all at once, reducing bot travel/migration.
 
     local working_bots = total_bots - available_bots
-    local usable_robots = math.max(1, math.ceil(((1-idle_bot_percentage_setting) * total_bots) / network_cell_count) - working_bots)
+    local usable_robots = math.max(1, math.ceil(((1-idle_bot_percentage_setting) * total_bots) / active_port_factor) - working_bots)
     creeper.usable_robots = usable_robots
     if force.max_successful_attempts_per_tick_per_construction_queue * 60 < usable_robots then
         force.max_successful_attempts_per_tick_per_construction_queue = math.floor(usable_robots / 60)
@@ -371,6 +375,7 @@ function area_tile_sleep_check(creeper, creep_data)
         else
             creeper.off = true
             creeper.removal_counter = 1
+            global.active_creepers = global.active_creepers - 1
         end
     end
 end
@@ -391,6 +396,7 @@ function standard_sleep_check(creeper, creep_data, upgrade_target_types)
             if switch then
                 creeper.off = true
                 creeper.removal_counter = 1
+                global.active_creepers = global.active_creepers - 1
             else
                 creeper.radius = 3 --Reset radius and switch to upgrade mode.
                 creeper.upgrade = true
@@ -466,6 +472,7 @@ function addPort(roboport)
     end
 
     table.insert(global.creepers, { roboport = roboport, radius = 3, pattern = pattern, item = it, off = false, removal_counter = 0 })
+    global.active_creepers = global.active_creepers + 1
 end
 
 function validate_tile_names()
