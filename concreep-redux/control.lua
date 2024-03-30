@@ -113,8 +113,8 @@ function creep(creeper)
 	-- This keeps any individual port from pulling too much of the network's bots towards it all at once, reducing bot travel/migration.
 
 	local working_bots    = total_bots - available_bots
-	local usable_robots   = math.max(1,
-									 math.ceil(((1 - idle_bot_percentage_setting) * total_bots) / active_port_factor) - working_bots)
+	local usable_robots   = math.max(1, math.ceil((((1 - idle_bot_percentage_setting) * total_bots) - working_bots) / active_port_factor))
+
 	creeper.usable_robots = usable_robots
 	if force.max_successful_attempts_per_tick_per_construction_queue * 60 < usable_robots then
 		force.max_successful_attempts_per_tick_per_construction_queue = math.floor(usable_robots / 60)
@@ -165,6 +165,8 @@ function standard_creep(creeper, creep_data)
 
 	local refined_concrete_count = math.max(0,
 											roboport.logistic_network.get_item_count("refined-concrete") - creep_data["minimum_item_count_setting"])
+	local refined_hazard_concrete_count = math.max(0,
+														roboport.logistic_network.get_item_count("refined-hazard-concrete") - creep_data["minimum_item_count_setting"])
 	local concrete_count         = math.max(0,
 											roboport.logistic_network.get_item_count("concrete") - creep_data["minimum_item_count_setting"])
 	local brick_count            = math.max(0,
@@ -204,22 +206,27 @@ function standard_creep(creeper, creep_data)
 	--Still here?  Look for upgrades that need done
 	local upgrade_target_types  = {}
 
-	if settings.global["upgrade-brick"].value then
+	if settings.global["upgrade-brick"].value and (refined_concrete_count > 0 or concrete_count > 0) then
 		table.insert(upgrade_target_types, "stone-path")
 	end
 
-	if settings.global["upgrade-concrete"].value then
+	if settings.global["upgrade-concrete"].value and refined_concrete_count > 0 then
 		table.insert(upgrade_target_types, "concrete")
+	end
+
+	if settings.global["upgrade-concrete"].value and refined_hazard_concrete_count > 0 then
 		table.insert(upgrade_target_types, "hazard-concrete-left")
 		table.insert(upgrade_target_types, "hazard-concrete-right")
 	end
 
 	if creeper.upgrade then
 		if #upgrade_target_types > 0 then
-			local upgradable_tiles = surface.find_tiles_filtered { area = creep_data["area"], name = upgrade_target_types, limit = math.min(math.max(concrete_count,
-																																					 refined_concrete_count,
-																																					 0),
-																																			creep_data["usable_robots"]) }
+			local upgradable_tiles = surface.find_tiles_filtered {
+				area = creep_data["area"],
+				name = upgrade_target_types,
+				limit = math.min(math.max(concrete_count, refined_concrete_count, 0), creep_data["usable_robots"])
+			}
+
 			for _, target_tile in pairs(upgradable_tiles) do
 				local tile_type = "refined-concrete"
 
@@ -355,7 +362,7 @@ function space_creep(creeper, creep_data)
 	--Still here?  Look for upgrades that need done
 	local upgrade_target_types  = {}
 
-	if settings.global["upgrade-space-scaffold"].value then
+	if settings.global["upgrade-space-scaffold"].value and space_tile_count > 0 then
 		table.insert(upgrade_target_types, "se-space-platform-scaffold")
 		table.insert(upgrade_target_types, "se-asteroid")
 	else
