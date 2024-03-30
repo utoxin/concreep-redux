@@ -1,4 +1,14 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.2.4
+Date: 2024/03/30
+  Changes:
+    - Fixed an issue where an internal tracking counter could get out of sync with the number of roboports in use.
+    - Fixed a rare issue discovered by Dir39 that could cause a non-recoverable error.
+  Known Issues:
+    - Space Exploration Compatability: When attempting to place space scaffolding, it will error once per tile, but the creep will progress. (Issue #1)
+    - Angels Bioprocessing Compatability: Attempting to place Bio Tiles near water will deadlock a ropobort's creep method. (Issue #10)
+
+---------------------------------------------------------------------------------------------------
 Version: 2.2.3
 Date: 2024/03/17
   Changes:
