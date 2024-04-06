@@ -1,4 +1,16 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.3.0
+Date: 2024/04/06
+  Added:
+    - Added landfill support, with logic to leave water around pumps if desired.
+    - Nonfunctional GUI for managing settings in a better way has been started.
+  Internal Changes:
+    - Split code up into new subdirectories, and prepared groundwork for new settings GUI.
+  Known Issues:
+    - Space Exploration Compatability: When attempting to place space scaffolding, it will error once per tile, but the creep will progress. (Issue #1)
+    - Angels Bioprocessing Compatability: Attempting to place Bio Tiles near water will deadlock a ropobort's creep method. (Issue #10)
+
+---------------------------------------------------------------------------------------------------
 Version: 2.2.5
 Date: 2024/03/30
   Changes:

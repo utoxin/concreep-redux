@@ -1,8 +1,8 @@
 {
   "name": "concreep-redux",
-  "version": "2.2.5",
+  "version": "2.3.0",
   "title": "Concreep Redux",
-  "author": ["Utoxin"],
+  "author": "Utoxin",
   "contact": "Github Issues",
   "homepage": "https://github.com/utoxin/concreep-redux",
   "description": "Roboports automatically place and upgrade concrete within their reach.",
