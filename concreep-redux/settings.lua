@@ -30,7 +30,22 @@ data:extend({
         setting_type = "runtime-global",
         default_value = 100,
         minimum_value = 0,
+        order = "033"
+    },
+    {
+        type = "bool-setting",
+        name = "creep-landfill",
+        setting_type = "runtime-global",
+        default_value = false,
         order = "035"
+    },
+    {
+        type = "int-setting",
+        name = "concreep-pump-radius",
+        setting_type = "runtime-global",
+        default_value = 3,
+        minimum_value = 0,
+        order = "037"
     },
     {
         type = "bool-setting",
