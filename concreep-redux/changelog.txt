@@ -2,7 +2,7 @@
 Version: 2.3.1
 Date: 2024/04/07
   Changes:
-    - Adjusted the lower bound on usable bots to zero, so that it won't place a single tile ghost if you have 0 bots in the network.
+    - Adjusted the lower bound on usable bots to zero, so that it won't place a single tile ghost if you have 0 bots in the network. (Issue #24, Reported by skofisk)
   Known Issues:
     - Space Exploration Compatability: When attempting to place space scaffolding, it will error once per tile, but the creep will progress. (Issue #1)
     - Angels Bioprocessing Compatability: Attempting to place Bio Tiles near water will deadlock a ropobort's creep method. (Issue #10)
