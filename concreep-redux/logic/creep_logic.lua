@@ -109,7 +109,7 @@ function creep(creeper)
 	-- This keeps any individual port from pulling too much of the network's bots towards it all at once, reducing bot travel/migration.
 
 	local working_bots    = total_bots - available_bots
-	local usable_robots   = math.max(1, math.ceil((((1 - idle_bot_percentage_setting) * total_bots) - working_bots) / active_port_factor))
+	local usable_robots   = math.max(0, math.ceil((((1 - idle_bot_percentage_setting) * total_bots) - working_bots) / active_port_factor))
 
 	creeper.usable_robots = usable_robots
 	if force.max_successful_attempts_per_tick_per_construction_queue * 60 < usable_robots then
