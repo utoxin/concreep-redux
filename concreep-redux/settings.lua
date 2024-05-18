@@ -1,6 +1,22 @@
 data:extend({
     {
         type = "int-setting",
+        name = "concreep-update-frequency",
+        setting_type = "runtime-global",
+        default_value = 10,
+        minimum_value = 1,
+        order = "001"
+    },
+    {
+        type = "int-setting",
+        name = "concreep-update-count",
+        setting_type = "runtime-global",
+        default_value = 10,
+        minimum_value = 1,
+        order = "002"
+    },
+    {
+        type = "int-setting",
         name = "concreep-range",
         setting_type = "runtime-global",
         default_value = 100,

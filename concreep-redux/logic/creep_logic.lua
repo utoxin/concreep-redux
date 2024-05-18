@@ -31,7 +31,9 @@ function check_roboports()
 		return
 	end
 
-	for i = 1, 10 do
+	local max_creepers = settings.global["concreep-update-count"].value
+
+	for i = 1, max_creepers do
 		if i > #global.creepers then
 			return
 		end
@@ -559,6 +561,6 @@ script.on_event(
 		roboports
 )
 
-script.on_nth_tick(60, check_roboports)
+script.on_nth_tick(settings.global["concreep-update-frequency"].value * 60, check_roboports)
 script.on_init(init)
 script.on_configuration_changed(init)
