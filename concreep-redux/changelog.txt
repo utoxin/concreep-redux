@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.3.2
+Date: 2024/05/18
+  Added:
+    - Setting to control update frequency. (Issue #26, Requested by Avaa2499)
+    - Setting to control number of roboports processed per update.
+
+---------------------------------------------------------------------------------------------------
 Version: 2.3.1
 Date: 2024/04/07
   Changes:
