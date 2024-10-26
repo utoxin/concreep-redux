@@ -2,7 +2,7 @@ data:extend({
     {
         type = "int-setting",
         name = "concreep-update-frequency",
-        setting_type = "runtime-global",
+        setting_type = "startup",
         default_value = 10,
         minimum_value = 1,
         order = "001"
