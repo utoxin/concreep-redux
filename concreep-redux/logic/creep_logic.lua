@@ -567,13 +567,13 @@ function addPort(roboport)
 	for xx = -2, 1, 1 do
 		pattern[xx + 3] = {}
 		it[xx + 3]      = {}
-		for yy = -2, 1, 1 do
-			local tile = surface.get_tile(roboport.position.x + xx, roboport.position.y + yy)
-			if (tile.hidden_tile and tile.prototype.items_to_place_this) and not (tile.name == "stone-path" or tile.name == "concrete" or tile.name == "refined-concrete") then
-				it[xx + 3][yy + 3]      = tile.prototype.items_to_place_this[1] and game.item_prototypes[tile.prototype.items_to_place_this[1].name] and tile.prototype.items_to_place_this[1].name
-				pattern[xx + 3][yy + 3] = tile.name
-			end
-		end
+		--for yy = -2, 1, 1 do
+		--	local tile = surface.get_tile(roboport.position.x + xx, roboport.position.y + yy)
+		--	if (tile.hidden_tile and tile.prototype.items_to_place_this) and not (tile.name == "stone-path" or tile.name == "concrete" or tile.name == "refined-concrete") then
+		--		it[xx + 3][yy + 3]      = tile.prototype.items_to_place_this[1] and game.item_prototypes[tile.prototype.items_to_place_this[1].name] and tile.prototype.items_to_place_this[1].name
+		--		pattern[xx + 3][yy + 3] = tile.name
+		--	end
+		--end
 	end
 
 	table.insert(storage.creepers,
