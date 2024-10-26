@@ -1,12 +1,12 @@
 function creep_init()
-	global.creepers        = {}
-	global.active_creepers = 0
+	storage.creepers        = {}
+	storage.active_creepers = 0
 	wake_up_creepers()
 end
 
 function wake_up_creepers()
-	global.index           = 1
-	global.active_creepers = 0
+	storage.index           = 1
+	storage.active_creepers = 0
 
 	for _, surface in pairs(game.surfaces) do
 		local roboports = surface.find_entities_filtered { type = "roboport" }
@@ -21,12 +21,12 @@ function wake_up_creepers()
 end
 
 function check_roboports()
-	if global.active_creepers == nil then
+	if storage.active_creepers == nil then
 		init()
 		return
 	end
 
-	if #global.creepers == 0 then
+	if #storage.creepers == 0 then
 		wake_up_creepers()
 		return
 	end
@@ -34,7 +34,7 @@ function check_roboports()
 	local max_creepers = settings.global["concreep-update-count"].value
 
 	for i = 1, max_creepers do
-		if i > #global.creepers then
+		if i > #storage.creepers then
 			return
 		end
 		local creeper = get_creeper()
@@ -61,10 +61,10 @@ function check_roboports()
 end
 
 function get_creeper()
-	if global.index > #global.creepers then
-		global.index = 1
+	if storage.index > #storage.creepers then
+		storage.index = 1
 	end
-	local creeper = global.creepers[global.index]
+	local creeper = storage.creepers[storage.index]
 	if not (creeper.roboport and creeper.roboport.valid) or creeper.off then
 		if creeper.roboport and creeper.roboport.valid and creeper.off and creeper.removal_counter and creeper.removal_counter < 10 then
 			creeper.removal_counter = creeper.removal_counter + 1
@@ -72,10 +72,10 @@ function get_creeper()
 		end
 
 		--Roboport removed
-		table.remove(global.creepers, global.index)
+		table.remove(storage.creepers, storage.index)
 		return
 	end
-	global.index = global.index + 1
+	storage.index = storage.index + 1
 	return creeper
 end
 
@@ -94,7 +94,7 @@ function creep(creeper)
 
 	local surface                    = roboport.surface
 	local force                      = roboport.force
-	local active_port_factor         = math.min(10, global.active_creepers or 1)
+	local active_port_factor         = math.min(10, storage.active_creepers or 1)
 
 	local minimum_item_count_setting = settings.global["concreep-minimum-item-count"].value
 	local concreep_range_setting     = settings.global["concreep-range"].value / 100
@@ -123,6 +123,7 @@ function creep(creeper)
 		{ roboport.position.x + current_radius, roboport.position.y + current_radius }
 	}
 
+	-- TODO: Add Space Age support
 	local in_space = false
 	if remote.interfaces["space-exploration"] then
 		in_space = "orbit" == remote.call("space-exploration", "get_surface_type", { surface_index = surface.index })
@@ -151,7 +152,7 @@ function landfill_creep(creeper, creep_data)
 	local force        = roboport.force
 
 	local ghosts       = surface.count_entities_filtered { area = creep_data["area"], name = "tile-ghost", force = force }
-	local water_tiles  = surface.find_tiles_filtered { has_hidden_tile = false, area = creep_data["area"], limit = creep_data["usable_robots"], collision_mask = { "water-tile" } }
+	local water_tiles  = surface.find_tiles_filtered { has_hidden_tile = false, area = creep_data["area"], limit = creep_data["usable_robots"], collision_mask = { "water_tile" } }
 
 	-- Wait for ghosts to finish building first.
 	if ghosts >= #water_tiles and ghosts > 0 then
@@ -189,7 +190,22 @@ function standard_creep(creeper, creep_data)
 	end
 
 	local ghosts       = surface.count_entities_filtered { area = creep_data["area"], name = "tile-ghost", force = force }
-	local virgin_tiles = surface.find_tiles_filtered { has_hidden_tile = false, area = creep_data["area"], limit = creep_data["usable_robots"], collision_mask = surface.get_tile(roboport.position).prototype.collision_mask }
+	local virgin_tiles = surface.find_tiles_filtered {
+		has_hidden_tile = false,
+		area = creep_data["area"],
+		limit = creep_data["usable_robots"],
+		collision_mask = "ground_tile"
+	}
+
+	if #virgin_tiles == 0 then
+		virgin_tiles = surface.find_tiles_filtered {
+			has_hidden_tile = true,
+			name = "landfill",
+			area = creep_data["area"],
+			limit = creep_data["usable_robots"],
+			collision_mask = "ground_tile"
+		}
+	end
 
 	-- Wait for ghosts to finish building first.
 	if ghosts >= #virgin_tiles and ghosts > 0 then
@@ -298,7 +314,7 @@ function area_tile_creep(creeper, creep_data)
 	end
 
 	local ghosts       = surface.count_entities_filtered { area = creep_data["area"], name = "tile-ghost", force = force }
-	local virgin_tiles = surface.find_tiles_filtered { has_hidden_tile = false, area = creep_data["area"], limit = creep_data["usable_robots"], collision_mask = surface.get_tile(roboport.position).prototype.collision_mask }
+	local virgin_tiles = surface.find_tiles_filtered { has_hidden_tile = false, area = creep_data["area"], limit = creep_data["usable_robots"], collision_mask = "ground_tile" }
 
 	-- Wait for ghosts to finish building first.
 	if ghosts >= #virgin_tiles and ghosts > 0 then
@@ -362,7 +378,7 @@ function space_creep(creeper, creep_data)
 	local force        = roboport.force
 
 	local ghosts       = surface.count_entities_filtered { area = creep_data["area"], name = "tile-ghost", force = force }
-	local virgin_tiles = surface.find_tiles_filtered { has_hidden_tile = false, area = creep_data["area"], limit = creep_data["usable_robots"], collision_mask = surface.get_tile(roboport.position).prototype.collision_mask }
+	local virgin_tiles = surface.find_tiles_filtered { name="se-space", area = creep_data["area"], limit = creep_data["usable_robots"], collision_mask = "ground_tile" }
 
 	-- Wait for ghosts to finish building first.
 	if ghosts >= #virgin_tiles and ghosts > 0 then
@@ -402,31 +418,29 @@ function space_creep(creeper, creep_data)
 	--Still here?  Look for upgrades that need done
 	local upgrade_target_types  = {}
 
-	if settings.global["upgrade-space-scaffold"].value and space_tile_count > 0 then
-		table.insert(upgrade_target_types, "se-space-platform-scaffold")
-		table.insert(upgrade_target_types, "se-asteroid")
-	else
-		return true
-	end
-
 	if creeper.upgrade then
-		if #upgrade_target_types > 0 then
-			local upgradable_tiles = surface.find_tiles_filtered { area = creep_data["area"], name = upgrade_target_types, limit = math.min(math.max(space_tile_count,
-																																					 0),
-																																			creep_data["usable_robots"]) }
-			for _, target_tile in pairs(upgradable_tiles) do
-				local tile_type         = "se-space-platform-plating"
-				count                   = count + build_tile(roboport, tile_type, target_tile.position)
-				creeper.removal_counter = 0
-			end
+		if settings.global["upgrade-space-scaffold"].value and space_tile_count > 0 then
+			table.insert(upgrade_target_types, "se-space-platform-scaffold")
+			table.insert(upgrade_target_types, "se-asteroid")
 
-			if count >= creep_data["usable_robots"] then
-				return true
+			if #upgrade_target_types > 0 then
+				local upgradable_tiles = surface.find_tiles_filtered { area = creep_data["area"], name = upgrade_target_types, limit = math.min(math.max(space_tile_count,
+																																						 0),
+																																				creep_data["usable_robots"]) }
+				for _, target_tile in pairs(upgradable_tiles) do
+					local tile_type         = "se-space-platform-plating"
+					count                   = count + build_tile(roboport, tile_type, target_tile.position)
+					creeper.removal_counter = 0
+				end
+
+				if count >= creep_data["usable_robots"] then
+					return true
+				end
 			end
 		end
 	end
 
-	standard_sleep_check(creeper, creep_data, upgrade_target_types)
+	space_sleep_check(creeper, creep_data, upgrade_target_types)
 	return false
 end
 
@@ -434,13 +448,13 @@ function area_tile_sleep_check(creeper, creep_data)
 	local roboport = creeper.roboport
 	local surface  = roboport.surface
 
-	if surface.count_tiles_filtered { area = creep_data["area"], has_hidden_tile = false, collision_mask = surface.get_tile(roboport.position).prototype.collision_mask } == 0 then
+	if surface.count_tiles_filtered { area = creep_data["area"], has_hidden_tile = false, collision_mask = "ground_tile" } == 0 then
 		if creep_data["current_radius"] < creep_data["target_creep_radius"] then
 			creeper.radius = math.min(creeper.radius + 1, roboport.logistic_cell.construction_radius)
 		else
 			creeper.off             = true
 			creeper.removal_counter = 1
-			global.active_creepers  = global.active_creepers - 1
+			storage.active_creepers  = storage.active_creepers - 1
 		end
 	end
 end
@@ -449,7 +463,7 @@ function standard_sleep_check(creeper, creep_data, upgrade_target_types)
 	local roboport = creeper.roboport
 	local surface  = roboport.surface
 
-	if surface.count_tiles_filtered { area = creep_data["area"], has_hidden_tile = false, collision_mask = surface.get_tile(roboport.position).prototype.collision_mask } == 0 then
+	if surface.count_tiles_filtered { area = creep_data["area"], has_hidden_tile = false, collision_mask = "ground_tile" } == 0 then
 		if creep_data["current_radius"] < creep_data["target_creep_radius"] then
 			creeper.radius = math.min(creeper.radius + 1, roboport.logistic_cell.construction_radius)
 		else
@@ -461,7 +475,32 @@ function standard_sleep_check(creeper, creep_data, upgrade_target_types)
 			if switch then
 				creeper.off             = true
 				creeper.removal_counter = 1
-				global.active_creepers  = global.active_creepers - 1
+				storage.active_creepers  = storage.active_creepers - 1
+			else
+				creeper.radius  = 3 --Reset radius and switch to upgrade mode.
+				creeper.upgrade = true
+			end
+		end
+	end
+end
+
+function space_sleep_check(creeper, creep_data, upgrade_target_types)
+	local roboport = creeper.roboport
+	local surface  = roboport.surface
+
+	if surface.count_tiles_filtered { area = creep_data["area"], name="se-space", collision_mask = "empty_space" } == 0 then
+		if creep_data["current_radius"] < creep_data["target_creep_radius"] then
+			creeper.radius = math.min(creeper.radius + 1, roboport.logistic_cell.construction_radius)
+		else
+			local switch = true
+
+			if #upgrade_target_types > 0 and surface.count_tiles_filtered { name = upgrade_target_types, area = creep_data["area"], limit = 1 } > 0 then
+				switch = false
+			end
+			if switch then
+				creeper.off             = true
+				creeper.removal_counter = 1
+				storage.active_creepers  = storage.active_creepers - 1
 			else
 				creeper.radius  = 3 --Reset radius and switch to upgrade mode.
 				creeper.upgrade = true
@@ -510,7 +549,7 @@ end
 
 function roboports(event)
 	local entity = event.created_entity or event.destination or event.entity
-	if not global.creepers then
+	if not storage.creepers then
 		init()
 	end
 	if validate(entity) then
@@ -537,16 +576,16 @@ function addPort(roboport)
 		end
 	end
 
-	table.insert(global.creepers,
+	table.insert(storage.creepers,
 				 { roboport = roboport, radius = 3, pattern = pattern, item = it, off = false, removal_counter = 0 })
 end
 
 function count_active_creepers()
-	global.active_creepers = 0
+	storage.active_creepers = 0
 
-	for i = #global.creepers, 1, -1 do
-		if global.creepers[i].off == false then
-			global.active_creepers = global.active_creepers + 1
+	for i = #storage.creepers, 1, -1 do
+		if storage.creepers[i].off == false then
+			storage.active_creepers = storage.active_creepers + 1
 		end
 	end
 end
@@ -561,6 +600,6 @@ script.on_event(
 		roboports
 )
 
-script.on_nth_tick(settings.global["concreep-update-frequency"].value * 60, check_roboports)
+script.on_nth_tick(settings.startup["concreep-update-frequency"].value * 60, check_roboports)
 script.on_init(init)
 script.on_configuration_changed(init)
