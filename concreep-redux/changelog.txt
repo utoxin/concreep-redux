@@ -1,4 +1,12 @@
 ---------------------------------------------------------------------------------------------------
+Version: 3.0.2
+Date: 2024/10/28
+  Added:
+    - Settings to disable the automatic deconstruction of cliffs, rocks, and trees. (Issue #37, Requested by Blastinburn)
+  Changes:
+    - Fixed settings for bricks in Tiles by Area. (Issue #36, Reported by Serjevski)
+
+---------------------------------------------------------------------------------------------------
 Version: 3.0.1
 Date: 2024/10/26
   Changes:
