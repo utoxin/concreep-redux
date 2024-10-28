@@ -321,17 +321,29 @@ function area_tile_creep(creeper, creep_data)
 		return
 	end
 
+	local logistic_area_item          = settings.global["concreep-logistic-area-tile"].value
+	local construction_area_item      = settings.global["concreep-construction-area-tile"].value
+
 	local logistic_area_tile          = settings.global["concreep-logistic-area-tile"].value
 	local construction_area_tile      = settings.global["concreep-construction-area-tile"].value
+
+	if logistic_area_tile == 'stone-brick' then
+		logistic_area_tile          = "stone-path"
+	end
+
+	if construction_area_tile == 'stone-brick' then
+        construction_area_tile      = "stone-path"
+    end
+
 	local minimum_item_count_setting  = settings.global["concreep-minimum-item-count"].value
 
 	local count                       = 0
 
 	local logistic_radius             = roboport.logistic_cell.logistic_radius
 	local available_logistic_tile     = math.max(0,
-												 roboport.logistic_network.get_item_count(logistic_area_tile) - minimum_item_count_setting)
+												 roboport.logistic_network.get_item_count(logistic_area_item) - minimum_item_count_setting)
 	local available_construction_tile = math.max(0,
-												 roboport.logistic_network.get_item_count(construction_area_tile) - minimum_item_count_setting)
+												 roboport.logistic_network.get_item_count(construction_area_item) - minimum_item_count_setting)
 
 	local roboport_x                  = roboport.position.x
 	local roboport_y                  = roboport.position.y
@@ -520,19 +532,29 @@ function build_tile(roboport, type, position)
 	else
 		return count
 	end
+
 	local tree_area = { { position.x - 0.2, position.y - 0.2 }, { position.x + 0.8, position.y + 0.8 } }
-	for _, tree in pairs(surface.find_entities_filtered { type = "tree", area = tree_area }) do
-		tree.order_deconstruction(roboport.force)
-		count = count + 1
-	end
-	for _, rock in pairs(surface.find_entities_filtered { type = "simple-entity", area = tree_area }) do
-		rock.order_deconstruction(roboport.force)
-		count = count + 1
-	end
-	for _, cliff in pairs(surface.find_entities_filtered { type = "cliff", limit = 1, area = tree_area }) do
-		if roboport.logistic_network.get_item_count("cliff-explosives") > 0 then
-			cliff.order_deconstruction(roboport.force)
+
+	if settings.global["concreep-clear-trees"].value then
+		for _, tree in pairs(surface.find_entities_filtered { type = "tree", area = tree_area }) do
+			tree.order_deconstruction(roboport.force)
 			count = count + 1
+		end
+	end
+
+	if settings.global["concreep-clear-rocks"].value then
+		for _, rock in pairs(surface.find_entities_filtered { type = "simple-entity", area = tree_area }) do
+			rock.order_deconstruction(roboport.force)
+			count = count + 1
+		end
+	end
+
+	if settings.global["concreep-clear-cliffs"].value then
+		for _, cliff in pairs(surface.find_entities_filtered { type = "cliff", limit = 1, area = tree_area }) do
+			if roboport.logistic_network.get_item_count("cliff-explosives") > 0 then
+				cliff.order_deconstruction(roboport.force)
+				count = count + 1
+			end
 		end
 	end
 

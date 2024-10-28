@@ -104,7 +104,7 @@ data:extend({
         setting_type = "runtime-global",
         default_value = "refined-concrete",
         auto_trim = true,
-        allowed_values = {"brick", "concrete", "refined-concrete"},
+        allowed_values = {"stone-brick", "concrete", "refined-concrete"},
         order = "090"
     },
     {
@@ -113,7 +113,28 @@ data:extend({
         setting_type = "runtime-global",
         default_value = "concrete",
         auto_trim = true,
-        allowed_values = {"brick", "concrete", "refined-concrete"},
+        allowed_values = {"stone-brick", "concrete", "refined-concrete"},
         order = "100"
+    },
+    {
+        type = "bool-setting",
+        name = "concreep-clear-cliffs",
+        setting_type = "runtime-global",
+        default_value = true,
+        order = "110"
+    },
+    {
+        type = "bool-setting",
+        name = "concreep-clear-rocks",
+        setting_type = "runtime-global",
+        default_value = true,
+        order = "120"
+    },
+    {
+        type = "bool-setting",
+        name = "concreep-clear-trees",
+        setting_type = "runtime-global",
+        default_value = true,
+        order = "130"
     }
 })
