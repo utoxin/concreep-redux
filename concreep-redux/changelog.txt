@@ -1,4 +1,13 @@
 ---------------------------------------------------------------------------------------------------
+Version: 3.0.3
+Date: 2024/11/03
+  Added:
+    - Setting for working in a circle instead of a square while placing ghosts. (End result doesn't change, just the way it places ghosts.)
+    - Settings for disabling creep on specific surfaces if Space Age is enabled. (Issue #34)
+  Known Issues:
+    - Concreep will happily overwrite farming / soil tiles, both natural and artificial. Until I can figure out a better solution, disabling creep on Gleba or other locations where you have those tile types is your best solution.
+
+---------------------------------------------------------------------------------------------------
 Version: 3.0.2
 Date: 2024/10/28
   Added:

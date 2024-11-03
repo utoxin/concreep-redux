@@ -26,6 +26,13 @@ data:extend({
     },
     {
         type = "bool-setting",
+        name = "concreep-circular-creep",
+        setting_type = "runtime-global",
+        default_value = false,
+        order = "015"
+    },
+    {
+        type = "bool-setting",
         name = "concreep-logistics-limit",
         setting_type = "runtime-global",
         default_value = false,
@@ -136,5 +143,56 @@ data:extend({
         setting_type = "runtime-global",
         default_value = true,
         order = "130"
+    },
+
+    -- Space Age related Settings
+    {
+        type = "bool-setting",
+        name = "concreep-nauvis-enable",
+        setting_type = "runtime-global",
+        default_value = true,
+        order = "140"
+    },
+    {
+        type = "bool-setting",
+        name = "concreep-gleba-enable",
+        setting_type = "runtime-global",
+        default_value = true,
+        order = "141"
+    },
+    {
+        type = "bool-setting",
+        name = "concreep-fulgora-enable",
+        setting_type = "runtime-global",
+        default_value = true,
+        order = "142"
+    },
+    {
+        type = "bool-setting",
+        name = "concreep-vulcanus-enable",
+        setting_type = "runtime-global",
+        default_value = true,
+        order = "143"
+    },
+    {
+        type = "bool-setting",
+        name = "concreep-aquilo-enable",
+        setting_type = "runtime-global",
+        default_value = true,
+        order = "144"
+    },
+    {
+        type = "bool-setting",
+        name = "concreep-replace-artificial-soils",
+        setting_type = "runtime-global",
+        default_value = true,
+        order = "145"
+    },
+    {
+        type = "bool-setting",
+        name = "concreep-replace-overgrowth-soils",
+        setting_type = "runtime-global",
+        default_value = true,
+        order = "146"
     }
 })
