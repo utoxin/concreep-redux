@@ -2,8 +2,13 @@ if not mods["space-exploration"] then
     data.raw["bool-setting"]["upgrade-space-scaffold"].hidden = true
 end
 
-local tiles = {"brick", "concrete", "refined-concrete"}
-
-if mods["Dectorio"] then
---    table.insert(data.raw["string-setting"]["concreep-construction-area-tile"].allowed_values, "test")
+if not mods["space-age"] then
+    data.raw["bool-setting"]["concreep-nauvis-enable"].hidden = true
+    data.raw["bool-setting"]["concreep-gleba-enable"].hidden = true
+    data.raw["bool-setting"]["concreep-fulgora-enable"].hidden = true
+    data.raw["bool-setting"]["concreep-vulcanus-enable"].hidden = true
+    data.raw["bool-setting"]["concreep-aquilo-enable"].hidden = true
 end
+
+data.raw["bool-setting"]["concreep-replace-artificial-soils"].hidden = true
+data.raw["bool-setting"]["concreep-replace-overgrowth-soils"].hidden = true
