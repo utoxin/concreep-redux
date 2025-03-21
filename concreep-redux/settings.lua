@@ -71,6 +71,14 @@ data:extend({
         order = "037"
     },
     {
+        type = "int-setting",
+        name = "concreep-agricultural-tower-radius",
+        setting_type = "runtime-global",
+        default_value = 10,
+        minimum_value = 0,
+        order = "038"
+    },
+    {
         type = "bool-setting",
         name = "creep-brick",
         setting_type = "runtime-global",

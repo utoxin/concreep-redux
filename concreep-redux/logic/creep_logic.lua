@@ -237,6 +237,8 @@ function standard_creep(creeper, creep_data)
 	local brick_count            = math.max(0,
 											roboport.logistic_network.get_item_count("stone-brick") - creep_data["minimum_item_count_setting"])
 
+	local agri_radius            = settings.global["concreep-agricultural-tower-radius"].value
+
 	for i = #virgin_tiles, 1, -1 do
 		local ghost_type
 
@@ -254,7 +256,13 @@ function standard_creep(creeper, creep_data)
 			end
 		end
 
-		if ghost_type then
+		local agri_count = 0
+		if agri_radius > 0 then
+			agri_count = surface.count_entities_filtered { position = virgin_tiles[i].position, radius = agri_radius, type = "agricultural-tower"}
+			agri_count = agri_count + surface.count_entities_filtered { position = virgin_tiles[i].position, radius = agri_radius, type = "entity-ghost", ghost_type = "agricultural-tower"}
+		end
+ 
+		if agri_count == 0 and ghost_type then
 			count = count + build_tile(roboport, ghost_type, virgin_tiles[i].position)
 		end
 
@@ -386,12 +394,14 @@ function area_tile_creep(creeper, creep_data)
 
 	local logistic_radius             = roboport.logistic_cell.logistic_radius
 	local available_logistic_tile     = math.max(0,
-												 roboport.logistic_network.get_item_count(logistic_area_item) - minimum_item_count_setting)
+												 roboport.logistic_network.get_iem_count(logistic_area_item) - minimum_item_count_setting)
 	local available_construction_tile = math.max(0,
 												 roboport.logistic_network.get_item_count(construction_area_item) - minimum_item_count_setting)
 
 	local roboport_x                  = roboport.position.x
 	local roboport_y                  = roboport.position.y
+
+	local agri_radius                 = settings.global["concreep-agricultural-tower-radius"].value
 
 	for i = #virgin_tiles, 1, -1 do
 		local ghost_type
@@ -414,7 +424,13 @@ function area_tile_creep(creeper, creep_data)
 			ghost_type              = logistic_area_tile
 		end
 
-		if ghost_type then
+		local agri_count = 0
+		if agri_radius > 0 then
+			agri_count = surface.count_entities_filtered { position = virgin_tiles[i].position, radius = agri_radius, type = "agricultural-tower"}
+			agri_count = agri_count + surface.count_entities_filtered { position = virgin_tiles[i].position, radius = agri_radius, type = "entity-ghost", ghost_type = "agricultural-tower"}
+		end
+
+		if agri_count == 0 and ghost_type then
 			count = count + build_tile(roboport, ghost_type, virgin_tiles[i].position)
 		end
 
